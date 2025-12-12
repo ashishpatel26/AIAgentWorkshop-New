@@ -26,7 +26,7 @@ You need:
 
 ```bash
 # Download this project
-git clone <repository-url>
+git clone https://github.com/ashishpatel26/AIAgentWorkshop-New.git
 cd ai-agent-workshop
 ```
 
@@ -51,13 +51,14 @@ uv sync
 ### Step 4: Configure Environment
 
 1. **Copy the environment template:**
+
    ```bash
    cp .env.example .env
    ```
-
 2. **Choose your AI provider and edit `.env`:**
 
    **For SambaNova (Cloud API - Recommended):**
+
    ```bash
    # AI Provider Selection
    AI_PROVIDER=sambanova
@@ -73,6 +74,7 @@ uv sync
    ```
 
    **For Ollama (Local Models - Free):**
+
    ```bash
    # AI Provider Selection
    AI_PROVIDER=ollama
@@ -89,11 +91,13 @@ uv sync
 ### Step 5: Get API Keys
 
 **SambaNova Setup:**
+
 1. Visit [SambaNova](https://sambanova.ai) and create account
 2. Get your API key from the dashboard
 3. Replace `your_sambanova_api_key_here` in `.env`
 
 **Ollama Setup:**
+
 1. Install Ollama from [ollama.ai](https://ollama.ai)
 2. Pull a model: `ollama pull llama3.2:3b`
 3. Start Ollama: `ollama serve`
@@ -272,6 +276,7 @@ flowchart TD
 ### Session 1: Basic AI Interactions
 
 **File: `session1/basics.py`** - Demonstrates fundamental AI chat and tool usage with LangChain
+
 ```mermaid
 flowchart TD
     A[🚀 main<br/>Entry Point] --> B[💬 basic_chat_example<br/>Chat Demo]
@@ -288,6 +293,7 @@ flowchart TD
 ```
 
 **File: `session1/crewai_intro.py`** - Introduction to multi-agent systems with CrewAI
+
 ```mermaid
 flowchart TD
     A[🚀 main<br/>Entry Point] --> B[👥 create_simple_crew<br/>Crew Setup]
@@ -306,6 +312,7 @@ flowchart TD
 ### Session 2: Multi-Agent Collaboration
 
 **File: `session2/agent_roles.py`** - Demonstrates different AI agent roles working together
+
 ```mermaid
 flowchart TD
     A[🚀 main<br/>Entry Point] --> B[📊 demonstrate_agent_roles<br/>Business Demo]
@@ -339,6 +346,7 @@ flowchart TD
 ```
 
 **File: `session2/content_crew.py`** - Complete content creation workflow with specialized agents
+
 ```mermaid
 flowchart TD
     A[🚀 main<br/>Entry Point] --> B[📝 run_content_creation_workflow<br/>Main Workflow]
@@ -370,6 +378,7 @@ flowchart TD
 ### Session 3: Stateful Workflows
 
 **File: `session3/stateful_workflow.py`** - Demonstrates AI workflows that remember information between steps
+
 ```mermaid
 flowchart TD
     A[🚀 main<br/>Entry Point] --> B[🔄 run_simple_workflow<br/>Main Demo]
@@ -408,6 +417,7 @@ flowchart TD
 ```
 
 **File: `session3/langgraph_basics.py`** - Fundamental LangGraph concepts and conditional routing
+
 ```mermaid
 flowchart TD
     A[🚀 main<br/>Entry Point] --> B[🧠 run_basic_langgraph_example<br/>Basic Example]
@@ -454,6 +464,7 @@ flowchart TD
 ### Utils: Helper Modules
 
 **File: `utils/config.py`** - Central configuration management and validation system
+
 ```mermaid
 flowchart TD
     A[🔑 get_config<br/>Global Instance] --> B[⚙️ WorkshopConfig<br/>Main Class]
@@ -479,6 +490,7 @@ flowchart TD
 ```
 
 **File: `utils/helpers.py`** - Utility functions for environment handling and data processing
+
 ```mermaid
 flowchart TD
     A[📂 load_environment_variables<br/>Env Loading] --> B[📄 load_dotenv<br/>Load .env]
@@ -512,6 +524,7 @@ flowchart TD
 ```
 
 **File: `utils/rate_limiter.py`** - Intelligent API rate limiting and retry logic
+
 ```mermaid
 flowchart TD
     A[🛡️ RateLimiter<br/>Main Class] --> B[🚀 __init__<br/>Initialize]
@@ -546,17 +559,18 @@ flowchart TD
     W --> Z[🤖 Return LLM<br/>With Retry Logic]
 ```
 
-
 ## 🆘 Having Problems?
 
 ### "API Key Not Working"
 
 **For SambaNova:**
+
 - Check your `.env` file has the correct key from SambaNova dashboard
 - Make sure `AI_PROVIDER=sambanova` is set
 - Verify your SambaNova account has credits
 
 **For Ollama:**
+
 - Make sure Ollama is running: `ollama serve`
 - Check that your model is pulled: `ollama list`
 - Verify `AI_PROVIDER=ollama` and correct model name in `.env`
@@ -570,11 +584,13 @@ flowchart TD
 ### "Connection Failed"
 
 **SambaNova:**
+
 - Check internet connection
 - Verify API key is active
 - Try a different model
 
 **Ollama:**
+
 - Ensure Ollama is running on http://localhost:11434
 - Check: `curl http://localhost:11434/api/tags`
 - Restart Ollama if needed
