@@ -4,7 +4,7 @@
 
 **Hello!** This is a simple workshop to learn about AI agents. We'll build smart AI helpers that can work together like a team. No advanced coding experience needed!
 
-## What You'll LearnP
+## What You'll Learn
 
 - How AI agents work (like smart assistants)
 - How to make multiple AI agents work together
