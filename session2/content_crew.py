@@ -3,29 +3,39 @@ Session 2: Content Creation Crew
 This file demonstrates a complete multi-agent system for content creation using CrewAI.
 """
 
+from crewai import Agent, Task, Crew, LLM
+from config import API_KEY, MODEL, API_BASE, TEMPERATURE, MAX_TOKENS, MAX_RETRIES, RETRY_DELAY, PROVIDER
+
+# Step 3: Set up environment for LiteLLM
 import os
-from dotenv import load_dotenv
-from crewai import Agent, Task, Crew
-from langchain_openai import ChatOpenAI
-from utils.config import get_config
+if PROVIDER == 'sambanova':
+    os.environ["SAMBANOVA_API_KEY"] = API_KEY
+elif PROVIDER == 'ollama':
+    # Ollama doesn't need environment variables
+    pass
 
-# Load environment variables
-load_dotenv()
-
-# Get configuration
-config = get_config()
-agent_config = config.get_agent_config()
+def get_llm():
+    """Get the appropriate LLM configuration based on provider."""
+    if PROVIDER == 'ollama':
+        return LLM(
+            model=f"ollama/{MODEL}",
+            base_url="http://localhost:11434"
+        )
+    elif PROVIDER == 'sambanova':
+        return LLM(
+            model=f"sambanova/{MODEL}",
+            api_key=API_KEY,
+            base_url=API_BASE
+        )
+    else:
+        # Default fallback
+        return f"{PROVIDER}/{MODEL}"
 
 def create_content_creation_crew(topic: str = "AI Agents"):
     """Create a content creation crew with researcher, writer, and editor agents."""
 
-    # Initialize the language model using configuration
-    llm = ChatOpenAI(
-        temperature=agent_config['temperature'],
-        model=agent_config['model'],
-        api_key=agent_config['api_key'],
-        base_url=agent_config['api_base']
-    )
+    # Use configured LLM
+    llm = get_llm()
 
     # Create agents with specific roles
     researcher = Agent(
@@ -142,7 +152,10 @@ def run_content_creation_workflow(topic: str = "AI Agents and Multi-Agent System
         agents=[researcher, writer, editor],
         tasks=[research_task, writing_task, editing_task],
         verbose=True,
-        process="sequential"  # Tasks run in sequence
+        process="sequential",                  # Tasks run in sequence
+        memory=True,                           # Enable memory
+        cache=True,                            # Enable caching
+        max_rpm=1                              # Rate limiting (further reduced)
     )
 
     # Execute the workflow
@@ -164,8 +177,16 @@ def main():
     print("=" * 65)
 
     try:
-        # Example topic
-        topic = "The Future of Multi-Agent AI Systems"
+        # Ask user for topic
+        try:
+            topic = input("What topic would you like the content creation team to write about? (press Enter for default): ").strip()
+            if not topic:
+                topic = "The Future of Multi-Agent AI Systems"
+        except EOFError:
+            # Handle non-interactive environments
+            topic = "The Future of Multi-Agent AI Systems"
+            print("What topic would you like the content creation team to write about? (press Enter for default): ")
+            print("(Using default topic in non-interactive environment)")
 
         result = run_content_creation_workflow(topic)
 
@@ -174,7 +195,11 @@ def main():
 
     except Exception as e:
         print(f"❌ Error running content creation crew: {e}")
-        print("Make sure your OPENROUTER_API_KEY is set correctly in the .env file.")
+        if PROVIDER == 'sambanova':
+            print("Make sure your SAMBA_API_KEY is set correctly in the .env file.")
+        elif PROVIDER == 'ollama':
+            print("Make sure Ollama is running locally on http://localhost:11434")
+            print("Install Ollama from https://ollama.ai and run: ollama serve")
         print("Also ensure all required packages are installed.")
 
 if __name__ == "__main__":

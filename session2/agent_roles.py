@@ -4,19 +4,33 @@ This file shows how different AI agents can have different jobs and work togethe
 Just like in a real company, each agent has a special role and expertise.
 """
 
+from crewai import Agent, Task, Crew, LLM
+from config import API_KEY, MODEL, API_BASE, TEMPERATURE, MAX_TOKENS, MAX_RETRIES, RETRY_DELAY, PROVIDER
+
+# Step 3: Set up environment for LiteLLM
 import os
-from dotenv import load_dotenv
-from crewai import Agent, Task, Crew
-from langchain_openai import ChatOpenAI
-from utils.config import get_config
-from utils.rate_limiter import create_rate_limited_llm
+if PROVIDER == 'sambanova':
+    os.environ["SAMBANOVA_API_KEY"] = API_KEY
+elif PROVIDER == 'ollama':
+    # Ollama doesn't need environment variables
+    pass
 
-# Step 1: Load our settings
-load_dotenv()
-
-# Step 2: Get AI configuration
-config = get_config()
-agent_config = config.get_agent_config()
+def get_llm():
+    """Get the appropriate LLM configuration based on provider."""
+    if PROVIDER == 'ollama':
+        return LLM(
+            model=f"ollama/{MODEL}",
+            base_url="http://localhost:11434"
+        )
+    elif PROVIDER == 'sambanova':
+        return LLM(
+            model=f"sambanova/{MODEL}",
+            api_key=API_KEY,
+            base_url=API_BASE
+        )
+    else:
+        # Default fallback
+        return f"{PROVIDER}/{MODEL}"
 
 def demonstrate_agent_roles():
     """Example: Different AI agents with different jobs working together."""
@@ -24,8 +38,8 @@ def demonstrate_agent_roles():
     print("This shows how AI agents can be like a team where each has a special job.")
     print()
 
-    # Create the AI brain for all agents with rate limiting
-    llm = create_rate_limited_llm(agent_config)
+    # Use configured LLM
+    llm = get_llm()
 
     print("Creating our AI team members...")
 
@@ -69,7 +83,10 @@ def demonstrate_agent_roles():
     business_crew = Crew(
         agents=[analyst, strategist],           # Team members
         tasks=[analysis_task, strategy_task],   # Jobs to do (in order)
-        verbose=True                           # Show progress
+        verbose=True,                          # Show progress
+        memory=True,                           # Enable memory
+        cache=True,                            # Enable caching
+        max_rpm=1                              # Rate limiting
     )
 
     # Start the work!
@@ -85,8 +102,8 @@ def show_simple_roles():
     print("Let's see how two agents with different skills work together.")
     print()
 
-    # Create AI brain with rate limiting
-    llm = create_rate_limited_llm(agent_config)
+    # Use configured LLM
+    llm = get_llm()
 
     # Create two simple agents
     chef = Agent(
@@ -123,7 +140,10 @@ def show_simple_roles():
     food_crew = Crew(
         agents=[chef, nutritionist],
         tasks=[recipe_task, health_task],
-        verbose=True
+        verbose=True,
+        memory=True,                           # Enable memory
+        cache=True,                            # Enable caching
+        max_rpm=1                              # Rate limiting
     )
 
     result = food_crew.kickoff()
@@ -151,7 +171,11 @@ def main():
 
     except Exception as e:
         print(f"Oops! Something went wrong: {e}")
-        print("Make sure your OPENROUTER_API_KEY is set correctly in the .env file.")
+        if PROVIDER == 'sambanova':
+            print("Make sure your SAMBA_API_KEY is set correctly in the .env file.")
+        elif PROVIDER == 'ollama':
+            print("Make sure Ollama is running locally on http://localhost:11434")
+            print("Install Ollama from https://ollama.ai and run: ollama serve")
         print("Check the README.md for help.")
 
 if __name__ == "__main__":

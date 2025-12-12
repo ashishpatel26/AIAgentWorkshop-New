@@ -10,8 +10,8 @@ def load_environment_variables() -> Dict[str, str]:
     """Load and validate environment variables."""
     load_dotenv()
 
-    required_vars = ['OPENROUTER_API_KEY']
-    optional_vars = ['OPENROUTER_MODEL', 'WORKSHOP_DEBUG', 'MAX_TOKENS', 'TEMPERATURE']
+    required_vars = ['GROQ_API_KEY']
+    optional_vars = ['GROQ_MODEL', 'WORKSHOP_DEBUG', 'MAX_TOKENS', 'TEMPERATURE']
 
     env_vars = {}
 
@@ -31,12 +31,12 @@ def load_environment_variables() -> Dict[str, str]:
     return env_vars
 
 def validate_api_key(api_key: str) -> bool:
-    """Validate OpenRouter API key format."""
+    """Validate Groq API key format."""
     if not api_key or not isinstance(api_key, str):
         return False
 
-    # Basic validation - OpenRouter keys start with 'sk-or-v1-'
-    return api_key.startswith('sk-or-v1-') and len(api_key) > 20
+    # Basic validation - Groq keys start with 'gsk_'
+    return api_key.startswith('gsk_') and len(api_key) > 20
 
 def format_agent_response(response: Any) -> str:
     """Format agent response for consistent output."""
@@ -152,31 +152,29 @@ def log_workflow_step(step_name: str, data: Optional[Dict] = None):
             print(f"  {key}: {value}")
 
 def get_available_models() -> list:
-    """Get list of available OpenRouter models for agents."""
+    """Get list of available Groq models for agents."""
     return [
-        "z-ai/glm-4.5-air:free",  # Free
-        "anthropic/claude-3-haiku",  # Free
-        "microsoft/wizardlm-2-8x22b",  # Free
-        "anthropic/claude-3-sonnet",
-        "openai/gpt-4",
-        "openai/gpt-3.5-turbo",
-        "google/gemini-pro",
-        "meta-llama/llama-2-70b-chat"
+        "gemma2-9b-it",  # Free
+        "llama3-8b-8192",  # Free
+        "llama3-70b-8192",  # Free
+        "mixtral-8x7b-32768",  # Free
+        "llama-3.1-8b-instant",
+        "llama-3.1-70b-versatile",
+        "llama-3.1-405b-inference"
     ]
 
-def estimate_cost(tokens_used: int, model: str = "z-ai/glm-4.5-air:free") -> float:
-    """Estimate API cost based on tokens used via OpenRouter (rough approximation)."""
-    # Approximate costs per 1K tokens via OpenRouter (as of 2024)
+def estimate_cost(tokens_used: int, model: str = "gemma2-9b-it") -> float:
+    """Estimate API cost based on tokens used via Groq (rough approximation)."""
+    # Approximate costs per 1K tokens via Groq (as of 2024)
     # Note: Many models have free tiers or very low costs
     costs = {
-        "z-ai/glm-4.5-air:free": 0.0,  # Free
-        "anthropic/claude-3-haiku": 0.0,  # Often free
-        "microsoft/wizardlm-2-8x22b": 0.0,  # Free
-        "anthropic/claude-3-sonnet": 0.015,  # $0.015 per 1K tokens
-        "openai/gpt-4": 0.03,  # $0.03 per 1K tokens
-        "openai/gpt-3.5-turbo": 0.002,  # $0.002 per 1K tokens
-        "google/gemini-pro": 0.0,  # Often free
-        "meta-llama/llama-2-70b-chat": 0.001,  # $0.001 per 1K tokens
+        "gemma2-9b-it": 0.0,  # Free
+        "llama3-8b-8192": 0.0,  # Free
+        "llama3-70b-8192": 0.0,  # Free
+        "mixtral-8x7b-32768": 0.0,  # Free
+        "llama-3.1-8b-instant": 0.0,  # Free
+        "llama-3.1-70b-versatile": 0.0,  # Free
+        "llama-3.1-405b-inference": 0.0,  # Free
     }
 
     cost_per_1k = costs.get(model, 0.01)  # Default fallback

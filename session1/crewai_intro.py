@@ -5,19 +5,32 @@ CrewAI helps multiple AI agents collaborate on tasks, just like a real team!
 """
 
 import os
-from dotenv import load_dotenv
-from crewai import Agent, Task, Crew
-from utils.config import get_config
-
-# Step 1: Load our settings
-load_dotenv()
-
-# Step 2: Get AI configuration
-config = get_config()
-agent_config = config.get_agent_config()
+from crewai import Agent, Task, Crew, LLM
+from config import API_KEY, MODEL, API_BASE, LLM_STRING, PROVIDER
 
 # Step 3: Set up environment for LiteLLM
-os.environ["OPENROUTER_API_KEY"] = agent_config['api_key']
+if PROVIDER == 'sambanova':
+    os.environ["SAMBANOVA_API_KEY"] = API_KEY
+elif PROVIDER == 'ollama':
+    # Ollama doesn't need environment variables
+    pass
+
+def get_llm():
+    """Get the appropriate LLM configuration based on provider."""
+    if PROVIDER == 'ollama':
+        return LLM(
+            model=f"ollama/{MODEL}",
+            base_url="http://localhost:11434"
+        )
+    elif PROVIDER == 'sambanova':
+        return LLM(
+            model=f"sambanova/{MODEL}",
+            api_key=API_KEY,
+            base_url=API_BASE
+        )
+    else:
+        # Default fallback
+        return LLM_STRING
 
 def simple_crew_example():
     """Example 1: Single AI Agent (like having one team member)"""
@@ -26,13 +39,18 @@ def simple_crew_example():
     print()
 
     # Ask user what topic they want researched
-    research_topic = input("What topic would you like the AI researcher to explain? (press Enter for default): ").strip()
-    if not research_topic:
+    try:
+        research_topic = input("What topic would you like the AI researcher to explain? (press Enter for default): ").strip()
+        if not research_topic:
+            research_topic = "AI agents"
+    except EOFError:
+        # Handle non-interactive environments
         research_topic = "AI agents"
+        print("What topic would you like the AI researcher to explain? (press Enter for default): ")
+        print("(Using default topic in non-interactive environment)")
 
-    # Use OpenRouter model format that LiteLLM understands
-    # CrewAI will automatically use LiteLLM with this format
-    llm = f"openrouter/{agent_config['model']}"
+    # Use configured LLM
+    llm = get_llm()
 
     print("Creating an AI researcher agent...")
     # Create one agent (like hiring one employee)
@@ -57,7 +75,10 @@ def simple_crew_example():
     crew = Crew(
         agents=[researcher],      # Team members
         tasks=[research_task],    # Jobs to do
-        verbose=True             # Show progress
+        verbose=True,            # Show progress
+        memory=True,             # Enable memory
+        cache=True,              # Enable caching
+        max_rpm=1               # Rate limiting (further reduced)
     )
 
     # Start the work!
@@ -74,13 +95,18 @@ def multi_agent_crew_example():
     print()
 
     # Ask user what topic they want the team to work on
-    team_topic = input("What topic would you like the AI team to research and write about? (press Enter for default): ").strip()
-    if not team_topic:
+    try:
+        team_topic = input("What topic would you like the AI team to research and write about? (press Enter for default): ").strip()
+        if not team_topic:
+            team_topic = "AI agents"
+    except EOFError:
+        # Handle non-interactive environments
         team_topic = "AI agents"
+        print("What topic would you like the AI team to research and write about? (press Enter for default): ")
+        print("(Using default topic in non-interactive environment)")
 
-    # Use OpenRouter model format that LiteLLM understands
-    # CrewAI will automatically use LiteLLM with this format
-    llm = f"openrouter/{agent_config['model']}"
+    # Use configured LLM
+    llm = get_llm()
 
     print("Creating two AI agents for our team...")
     # Create two agents (like hiring two employees)
@@ -121,7 +147,10 @@ def multi_agent_crew_example():
     crew = Crew(
         agents=[researcher, writer],           # Our team
         tasks=[research_task, writing_task],   # Jobs in order
-        verbose=True
+        verbose=True,
+        memory=True,                           # Enable memory
+        cache=True,                            # Enable caching
+        max_rpm=1                              # Rate limiting (further reduced)
     )
 
     # Start the team work!
@@ -152,7 +181,11 @@ def main():
 
     except Exception as e:
         print(f"Oops! Something went wrong: {e}")
-        print("Make sure your OPENROUTER_API_KEY is set correctly in the .env file.")
+        if PROVIDER == 'sambanova':
+            print("Make sure your SAMBA_API_KEY is set correctly in the .env file.")
+        elif PROVIDER == 'ollama':
+            print("Make sure Ollama is running locally on http://localhost:11434")
+            print("Install Ollama from https://ollama.ai and run: ollama serve")
         print("Check the README.md for setup help.")
 
 if __name__ == "__main__":

@@ -1,12 +1,19 @@
 """
-Session 3: LangGraph Basics
-This file demonstrates fundamental LangGraph concepts for building stateful agent workflows.
+Session 3: LangGraph Basics with NVIDIA API
+This file demonstrates fundamental LangGraph concepts for building stateful agent workflows using NVIDIA API.
 """
 
+import os
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Optional
-from config import API_KEY, MODEL, API_BASE, TEMPERATURE, MAX_TOKENS, MAX_RETRIES, RETRY_DELAY, PROVIDER
+
+# Load environment variables
+load_dotenv()
+
+# NVIDIA API Configuration
+NVIDIA_API_KEY = "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"
 
 # Define the state structure
 class AgentState(TypedDict):
@@ -20,12 +27,12 @@ class AgentState(TypedDict):
 def create_langgraph_workflow():
     """Create a basic LangGraph workflow with nodes and edges."""
 
-    # Initialize the LLM using configuration
+    # Initialize the LLM using NVIDIA API
     llm = ChatOpenAI(
-        temperature=TEMPERATURE,
-        model=MODEL,
-        api_key=API_KEY,
-        base_url=API_BASE
+        temperature=0.7,
+        model="meta/llama3-8b-instruct",
+        api_key=NVIDIA_API_KEY,
+        base_url="https://integrate.api.nvidia.com/v1"
     )
 
     def research_node(state: AgentState) -> AgentState:
@@ -160,7 +167,7 @@ def create_langgraph_workflow():
 
 def run_basic_langgraph_example():
     """Run a basic LangGraph workflow example."""
-    print("=== Basic LangGraph Workflow Example ===")
+    print("=== Basic LangGraph Workflow Example (NVIDIA API) ===")
     print()
 
     # Create the workflow
@@ -198,7 +205,7 @@ def run_basic_langgraph_example():
 def demonstrate_conditional_routing():
     """Demonstrate conditional routing in LangGraph."""
 
-    print("\n=== Conditional Routing Example ===")
+    print("\n=== Conditional Routing Example (NVIDIA API) ===")
     print()
 
     class QueryState(TypedDict):
@@ -206,12 +213,12 @@ def demonstrate_conditional_routing():
         query_type: Optional[str]
         response: Optional[str]
 
-    # Initialize the LLM using configuration
+    # Initialize the LLM using NVIDIA API
     llm = ChatOpenAI(
-        temperature=TEMPERATURE,
-        model=MODEL,
-        api_key=API_KEY,
-        base_url=API_BASE
+        temperature=0.7,
+        model="meta/llama3-8b-instruct",
+        api_key=NVIDIA_API_KEY,
+        base_url="https://integrate.api.nvidia.com/v1"
     )
 
     def classify_query(state: QueryState) -> QueryState:
@@ -303,8 +310,8 @@ def demonstrate_conditional_routing():
 
 def main():
     """Run LangGraph basics examples."""
-    print("AI Agent Workshop - Session 3: LangGraph Basics")
-    print("=" * 55)
+    print("AI Agent Workshop - Session 3: LangGraph Basics (NVIDIA API)")
+    print("=" * 60)
 
     try:
         # Run basic workflow example
@@ -313,7 +320,7 @@ def main():
         # Demonstrate conditional routing
         demonstrate_conditional_routing()
 
-        print("\n✅ LangGraph basics completed successfully!")
+        print("\n✅ LangGraph basics with NVIDIA API completed successfully!")
         print("\n💡 Key Concepts Learned:")
         print("   • State management in workflows")
         print("   • Node-based graph construction")
@@ -322,11 +329,7 @@ def main():
 
     except Exception as e:
         print(f"Error running LangGraph examples: {e}")
-        if PROVIDER == 'sambanova':
-            print("Make sure your SAMBA_API_KEY is set correctly in the .env file.")
-        elif PROVIDER == 'ollama':
-            print("Make sure Ollama is running locally on http://localhost:11434")
-            print("Install Ollama from https://ollama.ai and run: ollama serve")
+        print("Make sure your NVIDIA_API_KEY is set correctly in the .env file.")
         print("Also ensure langgraph is installed: uv pip install langgraph")
 
 if __name__ == "__main__":

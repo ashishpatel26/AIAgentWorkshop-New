@@ -24,7 +24,7 @@ class WorkshopConfig:
             # Continue with defaults
 
         # Set defaults
-        self._config.setdefault('OPENROUTER_MODEL', 'z-ai/glm-4.5-air:free')
+        self._config.setdefault('SAMBA_MODEL', 'gpt-oss-120b')
         self._config.setdefault('WORKSHOP_DEBUG', 'false')
         self._config.setdefault('MAX_TOKENS', '4000')
         self._config.setdefault('TEMPERATURE', '0.7')
@@ -73,17 +73,17 @@ class WorkshopConfig:
         errors = []
 
         # Check required API key
-        api_key = self.get('OPENROUTER_API_KEY')
+        api_key = self.get('SAMBA_API_KEY')
         if not api_key:
-            errors.append("OPENROUTER_API_KEY is required")
+            errors.append("SAMBA_API_KEY is required")
         elif not validate_api_key(api_key):
-            errors.append("OPENROUTER_API_KEY format is invalid")
+            errors.append("SAMBA_API_KEY format is invalid")
 
         # Check model
-        model = self.get('OPENROUTER_MODEL')
-        # OpenRouter supports many models, so we'll just check it's not empty
+        model = self.get('SAMBA_MODEL')
+        # SambaNova supports many models, so we'll just check it's not empty
         if not model:
-            errors.append("OPENROUTER_MODEL is required")
+            errors.append("SAMBA_MODEL is required")
 
         # Check temperature range
         temp = self.get('TEMPERATURE')
@@ -119,7 +119,7 @@ class WorkshopConfig:
 
         # Update with current config
         for key, value in self._config.items():
-            if key.startswith(('OPENROUTER_', 'WORKSHOP_', 'MAX_TOKENS', 'TEMPERATURE')):  # Save relevant configs
+            if key.startswith(('SAMBA_', 'WORKSHOP_', 'MAX_TOKENS', 'TEMPERATURE')):  # Save relevant configs
                 existing_content[key] = str(value)
 
         # Write back to file
@@ -132,16 +132,14 @@ class WorkshopConfig:
 
     def get_agent_config(self) -> Dict[str, Any]:
         """Get configuration specifically for agents."""
-        model = self.get('OPENROUTER_MODEL')
-        # Prefix with openrouter/ for litellm compatibility
-        if not model.startswith('openrouter/'):
-            model = f'openrouter/{model}'
+        model = self.get('SAMBA_MODEL')
+        # No prefix needed for SambaNova
         return {
             'model': model,
             'temperature': self.get('TEMPERATURE'),
             'max_tokens': self.get('MAX_TOKENS'),
-            'api_key': self.get('OPENROUTER_API_KEY'),
-            'api_base': 'https://openrouter.ai/api/v1',
+            'api_key': self.get('SAMBA_API_KEY'),
+            'api_base': 'https://api.sambanova.ai/v1',
             'max_retries': 3,  # Add retry logic
             'retry_delay': 1.0,  # Base delay in seconds
         }
@@ -159,10 +157,10 @@ class WorkshopConfig:
         config_copy = self._config.copy()
 
         # Mask sensitive information
-        if 'OPENROUTER_API_KEY' in config_copy:
-            key = config_copy['OPENROUTER_API_KEY']
+        if 'GROQ_API_KEY' in config_copy:
+            key = config_copy['GROQ_API_KEY']
             if len(key) > 10:
-                config_copy['OPENROUTER_API_KEY'] = key[:6] + '*' * (len(key) - 10) + key[-4:]
+                config_copy['GROQ_API_KEY'] = key[:6] + '*' * (len(key) - 10) + key[-4:]
 
         return f"WorkshopConfig({config_copy})"
 
@@ -198,42 +196,42 @@ def setup_config_interactive():
     config = get_config()
 
     # Check if API key is already set
-    if config.get('OPENROUTER_API_KEY'):
-        print("✓ OpenRouter API key is already configured")
+    if config.get('SAMBA_API_KEY'):
+        print("✓ SambaNova API key is already configured")
     else:
-        print("OpenRouter API key is required")
-        print("Get your API key from: https://openrouter.ai/keys")
-        api_key = input("Enter your OpenRouter API key: ").strip()
+        print("SambaNova API key is required")
+        print("Get your API key from: https://sambanova.ai")
+        api_key = input("Enter your SambaNova API key: ").strip()
         if api_key:
-            config.set('OPENROUTER_API_KEY', api_key)
+            config.set('SAMBA_API_KEY', api_key)
             print("✓ API key configured")
         else:
             print("❌ API key is required")
             return False
 
     # Optional: Configure model
-    current_model = config.get('OPENROUTER_MODEL', 'z-ai/glm-4.5-air:free')
+    current_model = config.get('GROQ_MODEL', 'openai/gpt-oss-20b:free')
     print(f"\nCurrent model: {current_model}")
     change_model = input("Change model? (y/N): ").strip().lower()
     if change_model == 'y':
         models = [
-            'amazon/nova-2-lite-v1:free', #Free
-            'z-ai/glm-4.5-air:free',  # Free
-            'anthropic/claude-3-haiku',  # Free
-            'microsoft/wizardlm-2-8x22b',  # Free
-            'anthropic/claude-3-sonnet',
-            'openai/gpt-4',
-            'openai/gpt-3.5-turbo'
+            'gemma2-9b-it', #Free
+            'llama3-8b-8192',  # Free
+            'llama3-70b-8192',  # Free
+            'mixtral-8x7b-32768',  # Free
+            'llama-3.1-8b-instant',
+            'llama-3.1-70b-versatile',
+            'llama-3.1-405b-inference'
         ]
         print("Available models (some free, some paid):")
         for i, model in enumerate(models, 1):
             free_indicator = " (Free)" if i <= 3 else ""
             print(f"  {i}. {model}{free_indicator}")
-        choice = input("Select model (1-6): ").strip()
+        choice = input("Select model (1-7): ").strip()
         try:
             index = int(choice) - 1
             if 0 <= index < len(models):
-                config.set('OPENROUTER_MODEL', models[index])
+                config.set('GROQ_MODEL', models[index])
                 print(f"✓ Model set to {models[index]}")
         except ValueError:
             print("Invalid choice, keeping current model")

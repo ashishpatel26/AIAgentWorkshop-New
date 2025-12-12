@@ -15,7 +15,7 @@
 
 You need:
 
-- **Python** (version 3.8 or higher) - most computers already have this!
+- **Python** (version 3.11 or higher) - most computers already have this!
 - **Basic Python knowledge** - if you can write `print("hello")`, you're ready!
 - **Internet connection** - to talk to AI services
 - **A computer** - Windows, Mac, or Linux
@@ -48,20 +48,67 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-### Step 4: Get Your AI Key
+### Step 4: Configure Environment
 
-1. Go to [OpenRouter.ai](https://openrouter.ai) and sign up (it's free!)
-2. Get your API key from the keys page
-3. Copy `.env.example` to `.env`:
+1. **Copy the environment template:**
    ```bash
    cp .env.example .env
    ```
-4. Open `.env` and replace `your_openrouter_api_key_here` with your real key
 
-### Step 5: Test Everything Works
+2. **Choose your AI provider and edit `.env`:**
+
+   **For SambaNova (Cloud API - Recommended):**
+   ```bash
+   # AI Provider Selection
+   AI_PROVIDER=sambanova
+
+   # SambaNova API Configuration
+   SAMBA_API_KEY=your_sambanova_api_key_here
+   SAMBA_MODEL=gpt-oss-120b
+
+   # Workshop Configuration
+   WORKSHOP_DEBUG=false
+   MAX_TOKENS=4000
+   TEMPERATURE=0.7
+   ```
+
+   **For Ollama (Local Models - Free):**
+   ```bash
+   # AI Provider Selection
+   AI_PROVIDER=ollama
+
+   # Ollama Configuration
+   OLLAMA_MODEL=llama3.2:3b
+
+   # Workshop Configuration
+   WORKSHOP_DEBUG=false
+   MAX_TOKENS=4000
+   TEMPERATURE=0.7
+   ```
+
+### Step 5: Get API Keys
+
+**SambaNova Setup:**
+1. Visit [SambaNova](https://sambanova.ai) and create account
+2. Get your API key from the dashboard
+3. Replace `your_sambanova_api_key_here` in `.env`
+
+**Ollama Setup:**
+1. Install Ollama from [ollama.ai](https://ollama.ai)
+2. Pull a model: `ollama pull llama3.2:3b`
+3. Start Ollama: `ollama serve`
+
+### Step 6: Test Everything Works
 
 ```bash
-python -c "import crewai; print('✅ Ready to start!')"
+# Test basic imports
+python -c "import crewai, langchain_openai; print('✅ Ready to start!')"
+
+# Test your configuration
+uv run python -c "from config import API_KEY, MODEL; print(f'✅ Config loaded: {MODEL}')"
+
+# Run a simple test
+uv run python testing/test_sambanova.py
 ```
 
 ## 🎯 What We'll Build (3 Simple Sessions)
@@ -78,8 +125,8 @@ Learn the basics! We'll create:
 
 ```bash
 cd session1
-python basics.py          # Learn basic AI chat
-python crewai_intro.py    # Learn about AI teams
+uv run basics.py          # Learn basic AI chat
+uv run crewai_intro.py    # Learn about AI teams
 ```
 
 ### Session 2: AI Agents Working Together (30 minutes)
@@ -94,27 +141,17 @@ Make AI agents collaborate! We'll build:
 
 ```bash
 cd session2
-python agent_roles.py     # See different AI jobs
-python content_crew.py    # Watch AI create content together
+uv run agent_roles.py     # See different AI jobs
+uv run content_crew.py    # Watch AI create content together
 ```
 
 **🎨 Interactive GUIs Available!**
-
-**Session 2 Agent Roles GUI:**
-
-```bash
-# Run the beautiful agent roles workshop GUI
-streamlit run session2/agent_roles_gui.py
-
-# Or use the launcher:
-python run_session2_gui.py
-```
 
 **Session 2 Advanced GUI:**
 
 ```bash
 # Run the comprehensive multi-team GUI
-streamlit run session2_gui.py
+uv run streamlit run agent_roles_gui.py
 ```
 
 **GUI Features:**
@@ -138,7 +175,7 @@ AI that remembers! We'll create:
 
 ```bash
 cd session3
-python stateful_workflow.py  # See AI remember information
+uv run stateful_workflow.py  # See AI remember information
 ```
 
 ## 📁 What's In This Project
@@ -146,10 +183,10 @@ python stateful_workflow.py  # See AI remember information
 ```bash
 ai-agent-workshop/
 ├── README.md              # This guide (you're reading it!)
+├── GIT_SETUP.md          # Git setup instructions for all OS
 ├── pyproject.toml         # Project configuration and dependencies
 ├── .env.example          # Template for your settings
-├── session2_gui.py       # 🎨 Interactive web GUI for Session 2
-├── run_session2_gui.py   # Launcher for the GUI
+├── config.py             # Simple configuration (loads automatically)
 ├── session1/             # Basic AI examples
 │   ├── basics.py         # Your first AI agents
 │   └── crewai_intro.py   # AI working in teams
@@ -157,12 +194,17 @@ ai-agent-workshop/
 │   ├── agent_roles.py    # Different AI jobs
 │   └── content_crew.py   # AI creating content together
 ├── session3/             # Smart workflows
-│   ├── stateful_workflow.py  # AI that remembers
-│   └── langgraph_basics.py  # Graph basics
-└── utils/                # Helper tools (you don't need to change these)
-    ├── config.py         # Configuration management
+│   ├── stateful_workflow.py          # AI that remembers
+│   ├── stateful_workflow_nvidia.py   # NVIDIA API version
+│   └── langgraph_basics.py           # Graph basics
+├── testing/              # Test scripts and utilities
+│   ├── test_langchain.py     # LangChain tests
+│   ├── test_nvidia_langchain.py  # NVIDIA API tests
+│   └── test_sambanova.py     # SambaNova API tests
+└── utils/                # Helper tools (advanced users only)
+    ├── config.py         # Legacy configuration
     ├── helpers.py        # Utility functions
-    └── rate_limiter.py   # 🆕 Intelligent API rate limiting
+    └── rate_limiter.py   # API rate limiting
 ```
 
 #### 🏗️ Code Architecture Diagram
@@ -171,12 +213,8 @@ ai-agent-workshop/
 flowchart TD
     %% Configuration files
     envFile[📄 .env<br/>Environment Variables]
+    configPy[📄 config.py<br/>Simple Auto-Config]
     pyproject[📄 pyproject.toml<br/>Dependencies]
-    configPy[📄 utils/config.py<br/>Configuration Management]
-
-    %% Utility files
-    helpers[📄 utils/helpers.py<br/>Helper Functions]
-    rateLimiter[📄 utils/rate_limiter.py<br/>API Rate Limiting]
 
     %% Session 1 files
     basics[📄 session1/basics.py<br/>Basic Chat & Tools]
@@ -185,51 +223,48 @@ flowchart TD
     %% Session 2 files
     agentRoles[📄 session2/agent_roles.py<br/>Agent Roles & Tasks]
     contentCrew[📄 session2/content_crew.py<br/>Content Creation]
-    agentRolesGui[📄 session2/agent_roles_gui.py<br/>GUI Interface]
 
     %% Session 3 files
     statefulWF[📄 session3/stateful_workflow.py<br/>Stateful Workflows]
-    langgraphBasics[📄 session3/langgraph_basics.py<br/>Graph Basics]
+    nvidiaWF[📄 session3/stateful_workflow_nvidia.py<br/>NVIDIA API Version]
+    langchainWF[📄 session3/stateful_workflow_langchain_nvidia.py<br/>LangChain Version]
+
+    %% Testing files
+    testFiles[📁 testing/<br/>Test Scripts]
 
     %% External frameworks
     langchain[(🤖 LangChain)]
     crewai[(👥 CrewAI)]
     langgraph[(📊 LangGraph)]
-    litellm[(🌐 LiteLLM)]
-    streamlit[(🎨 Streamlit)]
+    sambanova[(🌐 SambaNova API)]
+    ollama[(🏠 Ollama Local)]
 
     %% Connections
     envFile --> configPy
     pyproject --> configPy
-    configPy --> helpers
-    configPy --> rateLimiter
     configPy --> basics
     configPy --> crewaiIntro
     configPy --> agentRoles
     configPy --> contentCrew
-    configPy --> agentRolesGui
     configPy --> statefulWF
-    configPy --> langgraphBasics
-
-    rateLimiter --> basics
-    rateLimiter --> crewaiIntro
-    rateLimiter --> agentRoles
-    rateLimiter --> contentCrew
-    rateLimiter --> agentRolesGui
-    rateLimiter --> statefulWF
-    rateLimiter --> langgraphBasics
+    configPy --> nvidiaWF
+    configPy --> langchainWF
+    configPy --> testFiles
 
     basics --> langchain
     crewaiIntro --> crewai
     agentRoles --> crewai
     contentCrew --> crewai
-    agentRolesGui --> streamlit
     statefulWF --> langgraph
-    langgraphBasics --> langgraph
+    nvidiaWF --> langgraph
+    langchainWF --> langchain
 
-    langchain --> litellm
-    crewai --> litellm
-    langgraph --> litellm
+    langchain --> sambanova
+    langchain --> ollama
+    crewai --> sambanova
+    crewai --> ollama
+    langgraph --> sambanova
+    langgraph --> ollama
 ```
 
 ## 📊 Individual File Code Architectures
@@ -516,23 +551,33 @@ flowchart TD
 
 ### "API Key Not Working"
 
-- Check your `.env` file has the correct key from OpenRouter
-- Make sure there are no extra spaces
-- Try copying the key again from OpenRouter
+**For SambaNova:**
+- Check your `.env` file has the correct key from SambaNova dashboard
+- Make sure `AI_PROVIDER=sambanova` is set
+- Verify your SambaNova account has credits
 
-### "Rate Limit Exceeded"
+**For Ollama:**
+- Make sure Ollama is running: `ollama serve`
+- Check that your model is pulled: `ollama list`
+- Verify `AI_PROVIDER=ollama` and correct model name in `.env`
 
-The workshop includes **intelligent rate limiting** to handle API limits gracefully:
+### "Model Not Found" or "404 Error"
 
-- **Free accounts**: 50 requests/day limit on OpenRouter
-- **Automatic retries**: Scripts retry failed requests with exponential backoff
-- **Smart timing**: Extracts exact reset times from API responses
+- For SambaNova: Check available models at [SambaNova Models](https://sambanova.ai)
+- For Ollama: Pull the model first: `ollama pull llama3.2:3b`
+- Update your `.env` file with the correct model name
 
-**Solutions:**
+### "Connection Failed"
 
-- Add $10 credits to OpenRouter for 1000 daily requests
-- Wait for the daily reset (usually midnight UTC)
-- The rate limiter will automatically handle temporary limits
+**SambaNova:**
+- Check internet connection
+- Verify API key is active
+- Try a different model
+
+**Ollama:**
+- Ensure Ollama is running on http://localhost:11434
+- Check: `curl http://localhost:11434/api/tags`
+- Restart Ollama if needed
 
 ### "Package Installation Failed"
 

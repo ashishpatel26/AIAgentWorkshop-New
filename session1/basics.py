@@ -4,17 +4,8 @@ This file shows simple examples of AI agents for beginners.
 We will learn how AI can chat and use tools to solve problems.
 """
 
-import os
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from utils.config import get_config
-
-# Step 1: Load settings from .env file
-load_dotenv()
-
-# Step 2: Get our AI configuration
-config = get_config()
-agent_config = config.get_agent_config()
+from config import API_KEY, MODEL, API_BASE, TEMPERATURE, MAX_TOKENS, MAX_RETRIES, RETRY_DELAY, LLM_STRING, PROVIDER
 
 def basic_chat_example():
     """Example 1: Simple chat with AI"""
@@ -23,16 +14,22 @@ def basic_chat_example():
     print()
 
     # Ask user what they want to ask
-    user_question = input("What would you like to ask the AI? (press Enter for default): ").strip()
-    if not user_question:
+    try:
+        user_question = input("What would you like to ask the AI? (press Enter for default): ").strip()
+        if not user_question:
+            user_question = "Explain what an AI agent is in simple terms."
+    except EOFError:
+        # Handle non-interactive environments
         user_question = "Explain what an AI agent is in simple terms."
+        print("What would you like to ask the AI? (press Enter for default): ")
+        print("(Using default question in non-interactive environment)")
 
     # Create the AI model (like choosing which AI to talk to)
     llm = ChatOpenAI(
-        temperature=agent_config['temperature'],  # How creative the AI should be
-        model=agent_config['model'],              # Which AI model to use
-        api_key=agent_config['api_key'],          # Our secret key to use the AI
-        base_url=agent_config['api_base']         # Where to connect to the AI
+        temperature=TEMPERATURE,  # How creative the AI should be
+        model=MODEL,              # Which AI model to use
+        api_key=API_KEY,          # Our secret key to use the AI
+        base_url=API_BASE         # Where to connect to the AI
     )
 
     # Prepare our message to the AI
@@ -56,16 +53,22 @@ def simple_math_helper():
     print()
 
     # Ask user for their math question
-    math_question = input("What math question would you like to ask? (press Enter for default): ").strip()
-    if not math_question:
+    try:
+        math_question = input("What math question would you like to ask? (press Enter for default): ").strip()
+        if not math_question:
+            math_question = "If you have 15 apples and buy 27 more, then give away 3, how many do you have left?"
+    except EOFError:
+        # Handle non-interactive environments
         math_question = "If you have 15 apples and buy 27 more, then give away 3, how many do you have left?"
+        print("What math question would you like to ask? (press Enter for default): ")
+        print("(Using default question in non-interactive environment)")
 
     # Create the AI brain
     llm = ChatOpenAI(
-        temperature=agent_config['temperature'],
-        model=agent_config['model'],
-        api_key=agent_config['api_key'],
-        base_url=agent_config['api_base']
+        temperature=TEMPERATURE,
+        model=MODEL,
+        api_key=API_KEY,
+        base_url=API_BASE
     )
 
     # Create a helpful message for the AI
@@ -102,7 +105,11 @@ def main():
 
     except Exception as e:
         print(f"Oops! Something went wrong: {e}")
-        print("Make sure your OPENROUTER_API_KEY is set correctly in the .env file.")
+        if PROVIDER == 'sambanova':
+            print("Make sure your SAMBA_API_KEY is set correctly in the .env file.")
+        elif PROVIDER == 'ollama':
+            print("Make sure Ollama is running locally on http://localhost:11434")
+            print("Install Ollama from https://ollama.ai and run: ollama serve")
         print("Check the README.md for setup instructions.")
 
 if __name__ == "__main__":

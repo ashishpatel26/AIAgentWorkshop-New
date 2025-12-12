@@ -5,14 +5,13 @@ description = "AI Agent Workshop for Beginners"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "crewai",
     "langchain",
     "langchain-openai",
     "langgraph",
     "litellm",
     "openai",
     "python-dotenv",
-    "streamlit"
+    "streamlit",
 ]
 
 [tool.hatch.build.targets.wheel]
