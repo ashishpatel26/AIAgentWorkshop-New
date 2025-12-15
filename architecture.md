@@ -4,7 +4,7 @@ This document provides a visual representation of the codebase architecture usin
 
 ## Project Overview
 
-The AIAgentWorkshop is a Python-based educational project demonstrating progressive AI agent development, from basic interactions to complex multi-agent workflows. It supports multiple AI providers (SambaNova cloud API and Ollama local models) with a simple configuration system.
+The AIAgentWorkshop is a Python-based educational project demonstrating progressive AI agent development, from basic interactions to complex multi-agent workflows. It supports multiple AI providers (SambaNova cloud API, Ollama local models, and NVIDIA API) with a simple configuration system.
 
 ## Architecture Diagram
 
@@ -16,6 +16,7 @@ graph LR
         LangGraph[LangGraph<br/>StateGraph, TypedDict]
         SambaNova[SambaNova API<br/>Cloud LLM Models]
         Ollama[Ollama<br/>Local LLM Models]
+        NVIDIA[NVIDIA API<br/>Cloud LLM Models]
         DotEnv[python-dotenv<br/>Environment Loading]
     end
 
@@ -41,7 +42,7 @@ graph LR
     subgraph "Session 3: Stateful Workflows"
         S3LangGraph[session3/langgraph_basics.py<br/>LangGraph Basics<br/>- State Management<br/>- Node-Based Graphs<br/>- Conditional Routing]
         S3Stateful[session3/stateful_workflow.py<br/>CrewAI Workflows<br/>- Complex State Logic]
-        S3Nvidia[session3/stateful_workflow_nvidia.py<br/>NVIDIA API Version<br/>- Direct NVIDIA Integration]
+        S3Nvidia[session3/langgraph_basics_nvidia.py<br/>LangGraph Basics NVIDIA<br/>- NVIDIA API Integration]
         S3LangChain[session3/stateful_workflow_langchain_nvidia.py<br/>LangChain NVIDIA<br/>- Pure LangChain Approach]
     end
 
@@ -54,6 +55,7 @@ graph LR
     %% External Dependencies
     LangChain --> SambaNova
     LangChain --> Ollama
+    LangChain --> NVIDIA
     CrewAI --> LangChain
     LangGraph --> LangChain
 
@@ -105,7 +107,7 @@ graph LR
     class S2AgentRoles,S2GUI,S2Content session2
     class S3LangGraph,S3Stateful,S3Nvidia,S3LangChain session3
     class LegacyConfig,Helpers,RateLimiter legacy
-    class LangChain,CrewAI,LangGraph,SambaNova,Ollama,DotEnv external
+    class LangChain,CrewAI,LangGraph,SambaNova,Ollama,NVIDIA,DotEnv external
 ```
 
 ## Component Descriptions
@@ -121,6 +123,11 @@ The `config.py` file provides automatic configuration loading:
 ### Testing Infrastructure
 The `testing/` folder contains validation and testing scripts:
 
+- **test_langchain.py**: LangChain integration tests
+- **test_nvidia_langchain.py**: NVIDIA API with LangChain tests
+- **test_nvidia_model.py**: Direct NVIDIA model tests
+- **test_ollama.py**: Ollama local model tests
+- **test_sambanova.py**: SambaNova API tests
 - **API Testing**: Validate connections to different providers
 - **Integration Tests**: End-to-end workflow testing
 - **Provider Validation**: Ensure API keys and models work correctly
@@ -145,13 +152,14 @@ Session 3 demonstrates different approaches to stateful workflows:
 - **LangGraph**: Library for building stateful agent workflows with graph-based logic
 - **SambaNova API**: Cloud-based LLM provider with fast inference
 - **Ollama**: Local LLM runtime for running models offline
+- **NVIDIA API**: Cloud-based LLM provider with high-performance inference
 - **python-dotenv**: Environment variable management
 
 ## Data Flow
 
 1. Configuration is loaded automatically from `.env` via `config.py`
 2. Sessions import configuration variables directly
-3. AI providers (SambaNova/Ollama) are initialized with appropriate settings
+3. AI providers (SambaNova/Ollama/NVIDIA) are initialized with appropriate settings
 4. Agents execute tasks using external LLM APIs through LangChain/CrewAI/LangGraph
 5. Results are processed and presented to users
 
@@ -175,3 +183,9 @@ Session 3 demonstrates different approaches to stateful workflows:
 - Full control over models and data privacy
 - No API rate limits or costs
 - Requires local hardware resources
+
+### NVIDIA (Cloud)
+- High-performance cloud inference
+- Access to advanced NVIDIA models
+- Scalable and reliable API service
+- Suitable for production workloads
