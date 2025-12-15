@@ -9,90 +9,76 @@ The AIAgentWorkshop is a Python-based educational project demonstrating progress
 ## Architecture Diagram
 
 ```mermaid
-graph LR
-    subgraph "External Dependencies"
-        LangChain[LangChain OpenAI<br/>ChatOpenAI]
-        CrewAI[CrewAI Framework<br/>Agent, Task, Crew]
-        LangGraph[LangGraph<br/>StateGraph, TypedDict]
-        SambaNova[SambaNova API<br/>Cloud LLM Models]
-        Ollama[Ollama<br/>Local LLM Models]
-        NVIDIA[NVIDIA API<br/>Cloud LLM Models]
-        DotEnv[python-dotenv<br/>Environment Loading]
-    end
-
-    subgraph "Simple Configuration"
-        Config[config.py<br/>Auto-Configuration<br/>- Environment Loading<br/>- Provider Selection<br/>- Model Configuration]
-    end
-
-    subgraph "Testing & Validation"
-        TestScripts[testing/<br/>Test Scripts<br/>- API Validation<br/>- Provider Testing<br/>- Integration Tests]
-    end
-
-    subgraph "Session 1: Foundations"
-        S1Basics[session1/basics.py<br/>Basic AI Interactions<br/>- Simple Chat<br/>- Math Helper Examples]
-        S1CrewAI[session1/crewai_intro.py<br/>CrewAI Introduction<br/>- Single Agent Crews<br/>- Multi-Agent Teams]
-    end
-
-    subgraph "Session 2: Advanced Agents"
-        S2AgentRoles[session2/agent_roles.py<br/>Agent Roles & Teams<br/>- Specialized Roles<br/>- Collaborative Tasks]
-        S2GUI[session2/agent_roles_gui.py<br/>GUI Implementation<br/>- Agent Role Visualization]
-        S2Content[session2/content_crew.py<br/>Content Creation Crew<br/>- Content Workflow]
-    end
-
-    subgraph "Session 3: Stateful Workflows"
-        S3LangGraph[session3/langgraph_basics.py<br/>LangGraph Basics<br/>- State Management<br/>- Node-Based Graphs<br/>- Conditional Routing]
-        S3Stateful[session3/stateful_workflow.py<br/>CrewAI Workflows<br/>- Complex State Logic]
-        S3Nvidia[session3/langgraph_basics_nvidia.py<br/>LangGraph Basics NVIDIA<br/>- NVIDIA API Integration]
-        S3LangChain[session3/stateful_workflow_langchain_nvidia.py<br/>LangChain NVIDIA<br/>- Pure LangChain Approach]
-    end
-
-    subgraph "Legacy Utils (Advanced)"
-        LegacyConfig[utils/config.py<br/>Legacy Configuration<br/>- Complex Config Class]
-        Helpers[utils/helpers.py<br/>Utility Functions<br/>- Text Processing<br/>- Cost Estimation]
-        RateLimiter[utils/rate_limiter.py<br/>Rate Limiting<br/>- API Throttling]
-    end
-
-    %% External Dependencies
-    LangChain --> SambaNova
-    LangChain --> Ollama
-    LangChain --> NVIDIA
-    CrewAI --> LangChain
-    LangGraph --> LangChain
-
-    %% Configuration Flow
+flowchart LR
+ subgraph subGraph0["External Dependencies"]
+        LangChain["LangChain OpenAI<br>ChatOpenAI"]
+        CrewAI["CrewAI Framework<br>Agent, Task, Crew"]
+        LangGraph["LangGraph<br>StateGraph, TypedDict"]
+        SambaNova["SambaNova API<br>Cloud LLM Models"]
+        Ollama["Ollama<br>Local LLM Models"]
+        NVIDIA["NVIDIA API<br>Cloud LLM Models"]
+        DotEnv["python-dotenv<br>Environment Loading"]
+  end
+ subgraph subGraph1["Simple Configuration"]
+        Config["config.py<br>Auto-Configuration<br>- Environment Loading<br>- Provider Selection<br>- Model Configuration"]
+  end
+ subgraph subGraph2["Testing & Validation"]
+        TestScripts["testing/<br>Test Scripts<br>- API Validation<br>- Provider Testing<br>- Integration Tests"]
+  end
+ subgraph subGraph3["Session 1: Foundations"]
+        S1Basics["session1/basics.py<br>Basic AI Interactions<br>- Simple Chat<br>- Math Helper Examples"]
+        S1CrewAI["session1/crewai_intro.py<br>CrewAI Introduction<br>- Single Agent Crews<br>- Multi-Agent Teams"]
+  end
+ subgraph subGraph4["Session 2: Advanced Agents"]
+        S2AgentRoles["session2/agent_roles.py<br>Agent Roles &amp; Teams<br>- Specialized Roles<br>- Collaborative Tasks"]
+        S2GUI["session2/agent_roles_gui.py<br>GUI Implementation<br>- Agent Role Visualization"]
+        S2Content["session2/content_crew.py<br>Content Creation Crew<br>- Content Workflow"]
+  end
+ subgraph subGraph5["Session 3: Stateful Workflows"]
+        S3LangGraph["session3/langgraph_basics.py<br>LangGraph Basics<br>- State Management<br>- Node-Based Graphs<br>- Conditional Routing"]
+        S3Stateful["session3/stateful_workflow.py<br>CrewAI Workflows<br>- Complex State Logic"]
+        S3Nvidia["session3/langgraph_basics_nvidia.py<br>LangGraph Basics NVIDIA<br>- NVIDIA API Integration"]
+        S3LangChain["session3/stateful_workflow_langchain_nvidia.py<br>LangChain NVIDIA<br>- Pure LangChain Approach"]
+  end
+ subgraph subGraph6["Legacy Utils (Advanced)"]
+        LegacyConfig["utils/config.py<br>Legacy Configuration<br>- Complex Config Class"]
+        Helpers["utils/helpers.py<br>Utility Functions<br>- Text Processing<br>- Cost Estimation"]
+        RateLimiter["utils/rate_limiter.py<br>Rate Limiting<br>- API Throttling"]
+  end
+    LangChain --> SambaNova & Ollama & NVIDIA & S1Basics & S3LangChain
+    CrewAI --> LangChain & S1CrewAI & S2AgentRoles & S2Content & S3Stateful
+    LangGraph --> LangChain & S3LangGraph & S3Nvidia
     DotEnv --> Config
     Config --> TestScripts
+    Config -. Simple Config .-> S1Basics & S1CrewAI & S2AgentRoles & S2GUI & S2Content & S3LangGraph & S3Stateful & S3Nvidia & S3LangChain
+    S1Basics -. Builds Upon .-> S1CrewAI
+    S1CrewAI -. Advances To .-> S2AgentRoles
+    S2AgentRoles -. Extends To .-> S3LangGraph
+    S3LangGraph -. Branches To .-> S3Stateful
+    S3Stateful -. Alternative .-> S3Nvidia
+    S3Nvidia -. Alternative .-> S3LangChain
 
-    %% Session Dependencies
-    Config -.->|Simple Config| S1Basics
-    Config -.->|Simple Config| S1CrewAI
-    Config -.->|Simple Config| S2AgentRoles
-    Config -.->|Simple Config| S2GUI
-    Config -.->|Simple Config| S2Content
-    Config -.->|Simple Config| S3LangGraph
-    Config -.->|Simple Config| S3Stateful
-    Config -.->|Simple Config| S3Nvidia
-    Config -.->|Simple Config| S3LangChain
-
-    %% Progressive Learning Path
-    S1Basics -.->|Builds Upon| S1CrewAI
-    S1CrewAI -.->|Advances To| S2AgentRoles
-    S2AgentRoles -.->|Extends To| S3LangGraph
-    S3LangGraph -.->|Branches To| S3Stateful
-    S3Stateful -.->|Alternative| S3Nvidia
-    S3Nvidia -.->|Alternative| S3LangChain
-
-    %% Framework Usage
-    LangChain --> S1Basics
-    CrewAI --> S1CrewAI
-    CrewAI --> S2AgentRoles
-    CrewAI --> S2Content
-    CrewAI --> S3Stateful
-    LangGraph --> S3LangGraph
-    LangGraph --> S3Nvidia
-    LangChain --> S3LangChain
-
-    %% Styling
+     LangChain:::external
+     CrewAI:::external
+     LangGraph:::external
+     SambaNova:::external
+     Ollama:::external
+     NVIDIA:::external
+     DotEnv:::external
+     Config:::config
+     TestScripts:::testing
+     S1Basics:::session1
+     S1CrewAI:::session1
+     S2AgentRoles:::session2
+     S2GUI:::session2
+     S2Content:::session2
+     S3LangGraph:::session3
+     S3Stateful:::session3
+     S3Nvidia:::session3
+     S3LangChain:::session3
+     LegacyConfig:::legacy
+     Helpers:::legacy
+     RateLimiter:::legacy
     classDef config fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef testing fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef session1 fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
@@ -100,14 +86,6 @@ graph LR
     classDef session3 fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     classDef legacy fill:#f5f5f5,stroke:#616161,stroke-width:1px
     classDef external fill:#fafafa,stroke:#616161,stroke-width:2px
-
-    class Config config
-    class TestScripts testing
-    class S1Basics,S1CrewAI session1
-    class S2AgentRoles,S2GUI,S2Content session2
-    class S3LangGraph,S3Stateful,S3Nvidia,S3LangChain session3
-    class LegacyConfig,Helpers,RateLimiter legacy
-    class LangChain,CrewAI,LangGraph,SambaNova,Ollama,NVIDIA,DotEnv external
 ```
 
 ## Component Descriptions

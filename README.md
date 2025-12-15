@@ -80,7 +80,22 @@ uv sync
    AI_PROVIDER=ollama
 
    # Ollama Configuration
-   OLLAMA_MODEL=llama3.2:3b
+   OLLAMA_MODEL=gemma3:4b
+
+   # Workshop Configuration
+   WORKSHOP_DEBUG=false
+   MAX_TOKENS=4000
+   TEMPERATURE=0.7
+   ```
+
+   **For NVIDIA (Cloud API):**
+
+   ```bash
+   # AI Provider Selection
+   AI_PROVIDER=nvidia
+
+   # NVIDIA API Configuration
+   NVIDIA_API_KEY=your_nvidia_api_key_here
 
    # Workshop Configuration
    WORKSHOP_DEBUG=false
@@ -99,8 +114,15 @@ uv sync
 **Ollama Setup:**
 
 1. Install Ollama from [ollama.ai](https://ollama.ai)
-2. Pull a model: `ollama pull llama3.2:3b`
+2. Pull a model: `ollama pull gemma3:4b`
 3. Start Ollama: `ollama serve`
+
+**NVIDIA Setup:**
+
+1. Visit [NVIDIA AI Models](https://build.nvidia.com/models) and create an account
+2. Go to [API Keys Settings](https://build.nvidia.com/settings/api-keys) to generate your API key
+3. Copy the generated API key
+4. Replace `your_nvidia_api_key_here` in `.env` with your actual API key
 
 ### Step 6: Test Everything Works
 
@@ -111,8 +133,10 @@ python -c "import crewai, langchain_openai; print('✅ Ready to start!')"
 # Test your configuration
 uv run python -c "from config import API_KEY, MODEL; print(f'✅ Config loaded: {MODEL}')"
 
-# Run a simple test
-uv run python testing/test_sambanova.py
+# Run a simple test (choose based on your provider)
+uv run python testing/test_sambanova.py  # For SambaNova
+uv run python testing/test_ollama.py      # For Ollama
+uv run python testing/test_nvidia_langchain.py  # For NVIDIA
 ```
 
 ## 🎯 What We'll Build (3 Simple Sessions)
@@ -188,8 +212,13 @@ uv run stateful_workflow.py  # See AI remember information
 ai-agent-workshop/
 ├── README.md              # This guide (you're reading it!)
 ├── GIT_SETUP.md          # Git setup instructions for all OS
+├── CODE_REVIEW_REPORT.md # Comprehensive code review and recommendations
+├── architecture.md       # Detailed codebase architecture documentation
+├── ai_agent_workshop_curriculum.md # Workshop curriculum and lesson plans
 ├── pyproject.toml         # Project configuration and dependencies
+├── uv.lock               # Dependency lock file
 ├── .env.example          # Template for your settings
+├── .gitignore           # Git ignore rules
 ├── config.py             # Simple configuration (loads automatically)
 ├── session1/             # Basic AI examples
 │   ├── basics.py         # Your first AI agents
@@ -199,16 +228,20 @@ ai-agent-workshop/
 │   └── content_crew.py   # AI creating content together
 ├── session3/             # Smart workflows
 │   ├── stateful_workflow.py          # AI that remembers
-│   ├── stateful_workflow_nvidia.py   # NVIDIA API version
+│   ├── langgraph_basics_nvidia.py    # LangGraph basics with NVIDIA
+│   ├── stateful_workflow_langchain_nvidia.py # LangChain NVIDIA workflow
 │   └── langgraph_basics.py           # Graph basics
 ├── testing/              # Test scripts and utilities
 │   ├── test_langchain.py     # LangChain tests
 │   ├── test_nvidia_langchain.py  # NVIDIA API tests
+│   ├── test_nvidia_model.py   # Direct NVIDIA model tests
+│   ├── test_ollama.py         # Ollama local model tests
 │   └── test_sambanova.py     # SambaNova API tests
 └── utils/                # Helper tools (advanced users only)
     ├── config.py         # Legacy configuration
     ├── helpers.py        # Utility functions
     └── rate_limiter.py   # API rate limiting
+├── .qodo/                # Project artifacts
 ```
 
 #### 🏗️ Code Architecture Diagram
@@ -230,7 +263,7 @@ flowchart TD
 
     %% Session 3 files
     statefulWF[📄 session3/stateful_workflow.py<br/>Stateful Workflows]
-    nvidiaWF[📄 session3/stateful_workflow_nvidia.py<br/>NVIDIA API Version]
+    nvidiaWF[📄 session3/langgraph_basics_nvidia.py<br/>LangGraph Basics NVIDIA]
     langchainWF[📄 session3/stateful_workflow_langchain_nvidia.py<br/>LangChain Version]
 
     %% Testing files
@@ -242,6 +275,7 @@ flowchart TD
     langgraph[(📊 LangGraph)]
     sambanova[(🌐 SambaNova API)]
     ollama[(🏠 Ollama Local)]
+    nvidia[(🚀 NVIDIA API)]
 
     %% Connections
     envFile --> configPy
@@ -265,10 +299,13 @@ flowchart TD
 
     langchain --> sambanova
     langchain --> ollama
+    langchain --> nvidia
     crewai --> sambanova
     crewai --> ollama
+    crewai --> nvidia
     langgraph --> sambanova
     langgraph --> ollama
+    langgraph --> nvidia
 ```
 
 ## 📊 Individual File Code Architectures
@@ -575,10 +612,17 @@ flowchart TD
 - Check that your model is pulled: `ollama list`
 - Verify `AI_PROVIDER=ollama` and correct model name in `.env`
 
+**For NVIDIA:**
+
+- Check your `.env` file has the correct key from NVIDIA API dashboard
+- Make sure `AI_PROVIDER=nvidia` is set
+- Verify your NVIDIA account has credits and API access
+
 ### "Model Not Found" or "404 Error"
 
 - For SambaNova: Check available models at [SambaNova Models](https://sambanova.ai)
-- For Ollama: Pull the model first: `ollama pull llama3.2:3b`
+- For Ollama: Pull the model first: `ollama pull gemma3:4b`
+- For NVIDIA: Check available models at [NVIDIA API Models](https://build.nvidia.com)
 - Update your `.env` file with the correct model name
 
 ### "Connection Failed"
@@ -594,6 +638,12 @@ flowchart TD
 - Ensure Ollama is running on http://localhost:11434
 - Check: `curl http://localhost:11434/api/tags`
 - Restart Ollama if needed
+
+**NVIDIA:**
+
+- Check internet connection
+- Verify API key is active and has sufficient credits
+- Try a different model if available
 
 ### "Package Installation Failed"
 
